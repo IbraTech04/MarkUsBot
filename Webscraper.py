@@ -115,7 +115,9 @@ class Webscraper():
         response = requests.get(f'https://mcsmarks.utm.utoronto.ca/markus23s/courses/{self._courseid}/assignments', cookies=cookies, headers=headers)
         soup = BeautifulSoup(response.text, 'html.parser')
     
-        table = soup.find('table')
+        # find all tables
+        tables = soup.find_all('table')
+        table = tables[-1]
 
         rows = table.tbody.find_all('tr')
 

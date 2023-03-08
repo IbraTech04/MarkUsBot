@@ -29,7 +29,7 @@ class Notifier:
         self._webscraper = Webscraper(username, password, courseid)
         self._channel_id = channel_id
         self._role_id = role_id
-        self._update_assignments(True)
+        self._update_assignments(False)
     
     def _update_assignments(self, default_announced = False) -> None:
         """
@@ -40,7 +40,7 @@ class Notifier:
             if assignment['Assessment'] not in self._assignments:
                 # Make a new assignment object to add to the dictionary
                 name = assignment['Assessment']
-                due_date = datetime.datetime.strptime(assignment['Due date'][:-4], "%A, %B %d, %Y, %I:%M:%S %p")
+                due_date = datetime.datetime.strptime(assignment['Due date'][:-4].strip(), "%A, %B %d, %Y, %I:%M:%S %p")
                 is_released = assignment['Results'] == 'Results'
                 self._assignments[name] = Assignment(name, due_date, is_released, default_announced)
         
