@@ -11,8 +11,9 @@ markusbot = commands.Bot()
 notifiers = []
 
 @markusbot.slash_command(name="addnotifier", description="Adds a course to the list of courses to be notified about")
+
 async def addnotifider(interaction: nextcord.Interaction, username: str, password: str, courseid: str, channel: nextcord.abc.GuildChannel, role: nextcord.Role):
-    # defer the response so that the bot doesn't time out
+    # This next bit might take a while, so we'll defer the response
     await interaction.response.defer()
     try:
         notifiers.append(Notifier(username, password, courseid, int(channel.id), int(role.id)))
@@ -23,6 +24,7 @@ async def addnotifider(interaction: nextcord.Interaction, username: str, passwor
     else:
         await interaction.followup.send(f"Successfully added notifier for {courseid} in {channel.mention}.")
 
+# The main loop that checks for new assignments
 @tasks.loop(seconds=60)
 async def check_for_assignments():
     for notifier in notifiers:

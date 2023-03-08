@@ -33,6 +33,7 @@ class Webscraper():
         """
         Log into MarkUs and return the token cookie
         Precondition: _username and _password must be valid
+        Otherwise, a LoginError will be raised
         """
 
         cookies = {
@@ -72,8 +73,6 @@ class Webscraper():
         
         if "Login failed." in response.text:
             raise LoginFailed
-        if "You do not have permission to access this page." in response.text:
-            raise InvalidCourseID
     
         return response.headers['Set-Cookie'].split(";")[0].split("=")[1]
 
@@ -115,7 +114,10 @@ class Webscraper():
         response = requests.get(f'https://mcsmarks.utm.utoronto.ca/markus23s/courses/{self._courseid}/assignments', cookies=cookies, headers=headers)
         soup = BeautifulSoup(response.text, 'html.parser')
     
-        # find all tables
+        if "You do not have permission to access this page." in response.text:
+            raise InvalidCourseID
+    
+        # Since we only want the last table (i.e: past assignments), we can just get the last table
         tables = soup.find_all('table')
         table = tables[-1]
 

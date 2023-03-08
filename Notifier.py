@@ -33,7 +33,10 @@ class Notifier:
     
     def _update_assignments(self, default_announced = False) -> None:
         """
-        Update the list of assignments
+        Update the list of assignments. If the assignment is not in the dictionary, add it. If it is, update the due date and released status
+        default_announced: whether or not the assignment should be set to announced by default
+        This is set to False by default to indicate that the assignment has not been announced yet
+        This argument is used by __init__ to set all existing assignments as announced
         """
         assignmnets = self._webscraper.get_assignments()
         for assignment in assignmnets:
