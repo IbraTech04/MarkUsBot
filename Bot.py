@@ -13,6 +13,12 @@ notifiers = []
 @markusbot.slash_command(name="addnotifier", description="Adds a course to the list of courses to be notified about")
 
 async def addnotifider(interaction: nextcord.Interaction, username: str, password: str, courseid: str, channel: nextcord.abc.GuildChannel, role: nextcord.Role):
+    
+    # Make sure the user has the manage server permission
+    if not interaction.author.guild_permissions.manage_guild:
+        await interaction.response.send_message("You do not have the manage server permission.", ephemeral=True)
+        return
+
     # This next bit might take a while, so we'll defer the response
     await interaction.response.defer()
     try:
