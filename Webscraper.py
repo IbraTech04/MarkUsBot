@@ -72,7 +72,9 @@ class Webscraper():
         
         if "Login failed." in response.text:
             raise LoginFailed
-
+        if "You do not have permission to access this page." in response.text:
+            raise InvalidCourseID
+    
         return response.headers['Set-Cookie'].split(";")[0].split("=")[1]
 
     def get_assignments(self) -> list[dict]:

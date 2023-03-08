@@ -5,7 +5,7 @@ import dotenv
 dotenv.load_dotenv("tokens.env")
 from nextcord.ext import tasks
 from Notifier import Notifier
-
+from Exceptions import *
 markusbot = commands.Bot()
 
 notifiers = []
@@ -14,8 +14,14 @@ notifiers = []
 async def addnotifider(interaction: nextcord.Interaction, username: str, password: str, courseid: str, channel: nextcord.abc.GuildChannel, role: nextcord.Role):
     # defer the response so that the bot doesn't time out
     await interaction.response.defer()
-    notifiers.append(Notifier(username, password, courseid, int(channel.id), int(role.id)))
-    await interaction.followup.send(f"Added notifier for {courseid} in {channel.mention} with role {role.mention}")
+    try:
+        notifiers.append(Notifier(username, password, courseid, int(channel.id), int(role.id)))
+    except LoginFailed:
+        await interaction.followup.send("Login failed. Please check your username and password.")
+    except InvalidCourseID:
+        await interaction.followup.send("Invalid course ID. Please check your course ID.")
+    else:
+        await interaction.followup.send(f"Successfully added notifier for {courseid} in {channel.mention}.")
 
 @tasks.loop(seconds=60)
 async def check_for_assignments():
