@@ -64,5 +64,17 @@ class Notifier:
                 to_announce.append(assignment)
         
         return to_announce
+
+    def get_assignments(self) -> list[Assignment]:
+        """
+        Returns a list of all released assignments
+        """
+        self._update_assignments()
+        to_announce = []
+        for assignment in self._assignments.values():
+            if assignment.get_released():
+                assignment.set_announced(True)
+                to_announce.append(assignment)
         
+        return to_announce        
         

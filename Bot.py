@@ -11,8 +11,7 @@ markusbot = commands.Bot()
 notifiers = []
 
 @markusbot.slash_command(name="addnotifier", description="Adds a course to the list of courses to be notified about")
-
-async def addnotifider(interaction: nextcord.Interaction, username: str, password: str, courseid: str, channel: nextcord.abc.GuildChannel, role: nextcord.Role):
+async def addnotifiernew(interaction: nextcord.Interaction, courseid: str, channel: nextcord.abc.GuildChannel, role: nextcord.Role):
     
     # Make sure the user has the manage server permission
     if not interaction.user.guild_permissions.manage_guild:
@@ -21,6 +20,18 @@ async def addnotifider(interaction: nextcord.Interaction, username: str, passwor
 
     # This next bit might take a while, so we'll defer the response
     await interaction.response.defer()
+    
+    await interaction.user.send("Please confirm your username and password by typing them in the chat, separated by a space. Example: `username password`")
+    # Wait for the user to send a message
+    try:
+        msg = await markusbot.wait_for("message", check=lambda message: message.author == interaction.user)
+        username = msg.content.split()[0]
+        password = msg.content.split()[1]
+        await interaction.user.send("Thank you! Your username and password will now be validated")
+    except IndexError:
+        await interaction.followup.send("Invalid username or password. Please try again.")
+        return
+    
     try:
         notifiers.append(Notifier(username, password, courseid, int(channel.id), int(role.id)))
     except LoginFailed:
@@ -29,6 +40,7 @@ async def addnotifider(interaction: nextcord.Interaction, username: str, passwor
         await interaction.followup.send("Invalid course ID. Please check your course ID.")
     else:
         await interaction.followup.send(f"Successfully added notifier for {courseid} in {channel.mention}.")
+
 
 # The main loop that checks for new assignments
 @tasks.loop(seconds=60)
