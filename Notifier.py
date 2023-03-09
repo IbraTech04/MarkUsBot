@@ -29,7 +29,7 @@ class Notifier:
         self._webscraper = Webscraper(username, password, courseid)
         self._channel_id = channel_id
         self._role_id = role_id
-        self._update_assignments(False)
+        self._update_assignments(True)
     
     def _update_assignments(self, default_announced = False) -> None:
         """

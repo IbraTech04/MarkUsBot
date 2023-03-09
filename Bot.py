@@ -15,7 +15,7 @@ notifiers = []
 async def addnotifider(interaction: nextcord.Interaction, username: str, password: str, courseid: str, channel: nextcord.abc.GuildChannel, role: nextcord.Role):
     
     # Make sure the user has the manage server permission
-    if not interaction.author.guild_permissions.manage_guild:
+    if not interaction.user.guild_permissions.manage_guild:
         await interaction.response.send_message("You do not have the manage server permission.", ephemeral=True)
         return
 
