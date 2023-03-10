@@ -29,14 +29,12 @@ class Notifier:
         self._webscraper = Webscraper(username, password, courseid)
         self._channel_id = channel_id
         self._role_id = role_id
-        self._update_assignments(True)
+        self._update_assignments()
     
-    def _update_assignments(self, default_announced = False) -> None:
+    def _update_assignments(self) -> None:
         """
         Update the list of assignments. If the assignment is not in the dictionary, add it. If it is, update the due date and released status
-        default_announced: whether or not the assignment should be set to announced by default
-        This is set to False by default to indicate that the assignment has not been announced yet
-        This argument is used by __init__ to set all existing assignments as announced
+        This method assumes all assignments that have already been released have been announced
         """
         assignmnets = self._webscraper.get_assignments()
         for assignment in assignmnets:
@@ -45,7 +43,7 @@ class Notifier:
                 name = assignment['Assessment']
                 due_date = datetime.datetime.strptime(assignment['Due date'][:-4].strip(), "%A, %B %d, %Y, %I:%M:%S %p")
                 is_released = assignment['Results'] == 'Results'
-                self._assignments[name] = Assignment(name, due_date, is_released, default_announced)
+                self._assignments[name] = Assignment(name, due_date, is_released, is_released)
         
             # If it's already in the dictionary, update the due date and released status
             else:
