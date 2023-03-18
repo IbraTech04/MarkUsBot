@@ -41,6 +41,14 @@ async def addnotifiernew(interaction: nextcord.Interaction, courseid: str, chann
     else:
         await interaction.followup.send(f"Successfully added notifier for {courseid} in {channel.mention}.")
 
+@markusbot.slash_command(name="viewassignments", description="View the assignments for a course")
+@commands.is_owner()
+async def viewassignments(interaction: nextcord.Interaction):
+    msg = "```"
+    for assignment in notifiers[0]._assignments:
+        msg += str(notifiers[0]._assignments[assignment]) + "\n"
+    msg += "```"
+    await interaction.response.send_message(msg)
 
 # The main loop that checks for new assignments
 @tasks.loop(seconds=60)

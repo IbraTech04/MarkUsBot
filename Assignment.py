@@ -16,6 +16,7 @@ class Assignment:
     _name: str
     _due_date: datetime.date
     _released: bool
+    _is_announced: bool
     
     def __init__(self, name: str, due_date: datetime.date, released: bool, is_announced = False) -> None:
         """
@@ -25,7 +26,10 @@ class Assignment:
         self._due_date = due_date
         self._released = released
         self._is_announced = is_announced
-    
+
+    def __str__(self):
+        # Return a string representation of the assignment
+        return f"{self._name} is due on {self._due_date} and is released: {self._released}. Is Announced? {self._is_announced}"
     def get_name(self) -> str:
         return self._name
     
