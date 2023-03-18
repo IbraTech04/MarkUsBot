@@ -51,7 +51,7 @@ async def viewassignments(interaction: nextcord.Interaction):
     await interaction.response.send_message(msg)
 
 # The main loop that checks for new assignments
-@tasks.loop(seconds=60)
+@tasks.loop(seconds=1)
 async def check_for_assignments():
     for notifier in notifiers:
         assignments_to_announce = notifier.get_released_assignments()
