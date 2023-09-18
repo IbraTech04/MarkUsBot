@@ -6,39 +6,23 @@ dotenv.load_dotenv("tokens.env")
 from nextcord.ext import tasks
 from Notifier import Notifier
 from Exceptions import *
-from pymongo import MongoClient
+
 
 markusbot = commands.Bot()
 
 notifiers = []
 
 @markusbot.slash_command(name="addnotifier", description="Adds a course to the list of courses to be notified about")
-async def addnotifiernew(interaction: nextcord.Interaction, courseid: str, channel: nextcord.abc.GuildChannel, role: nextcord.Role):
+async def addnotifiernew(interaction: nextcord.Interaction, courseid: str, instance_url: str, channel: nextcord.abc.GuildChannel, role: nextcord.Role):
     
     # Make sure the user has the manage server permission
     if not interaction.user.guild_permissions.manage_guild:
         await interaction.response.send_message("You do not have the manage server permission.", ephemeral=True)
         return
-
-    # This next bit might take a while, so we'll defer the response
-    await interaction.response.defer()
-    
-    await interaction.user.send("Please confirm your username and password by typing them in the chat, separated by a space. Example: `username password`")
-    # Wait for the user to send a message
-    try:
-        msg = await markusbot.wait_for("message", check=lambda message: message.author == interaction.user)
-        username = msg.content.split()[0]
-        password = msg.content.split()[1]
-        await interaction.user.send("Thank you! Your username and password will now be validated")
-    except IndexError:
-        await interaction.followup.send("Invalid username or password. Please try again.")
-        return
     
     try:
-        new = Notifier(username, password, courseid, int(channel.id), int(role.id))
+        new = Notifier(courseid, int(channel.id), int(role.id))
         notifiers.append(new)
-    except LoginFailed:
-        await interaction.followup.send("Login failed. Please check your username and password.")
     except InvalidCourseID:
         await interaction.followup.send("Invalid course ID. Please check your course ID.")
     else:
