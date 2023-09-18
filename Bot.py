@@ -6,6 +6,8 @@ dotenv.load_dotenv("tokens.env")
 from nextcord.ext import tasks
 from Notifier import Notifier
 from Exceptions import *
+from pymongo import MongoClient
+
 markusbot = commands.Bot()
 
 notifiers = []
@@ -33,7 +35,8 @@ async def addnotifiernew(interaction: nextcord.Interaction, courseid: str, chann
         return
     
     try:
-        notifiers.append(Notifier(username, password, courseid, int(channel.id), int(role.id)))
+        new = Notifier(username, password, courseid, int(channel.id), int(role.id))
+        notifiers.append(new)
     except LoginFailed:
         await interaction.followup.send("Login failed. Please check your username and password.")
     except InvalidCourseID:
@@ -41,9 +44,19 @@ async def addnotifiernew(interaction: nextcord.Interaction, courseid: str, chann
     else:
         await interaction.followup.send(f"Successfully added notifier for {courseid} in {channel.mention}.")
 
+        
+
+@markusbot.slash_command(name="viewassignments", description="View the assignments for a course")
+@commands.is_owner()
+async def viewassignments(interaction: nextcord.Interaction):
+    msg = "```"
+    for assignment in notifiers[0]._assignments:
+        msg += str(notifiers[0]._assignments[assignment]) + "\n"
+    msg += "```"
+    await interaction.response.send_message(msg)
 
 # The main loop that checks for new assignments
-@tasks.loop(seconds=1)
+@tasks.loop(seconds=60)
 async def check_for_assignments():
     for notifier in notifiers:
         assignments_to_announce = notifier.get_released_assignments()

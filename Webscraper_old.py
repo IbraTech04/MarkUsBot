@@ -4,8 +4,8 @@ from Exceptions import *
 
 class Webscraper():
     """
-    Class used to scrape the MarkUs website for assignments
-
+    The old legacy class used to scrape off of MarkUs
+    Superceded by MarkUsAPIWrapper
     === Attributes ===
     _username: username of the user
     _password: password of the user

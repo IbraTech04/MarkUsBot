@@ -1,5 +1,5 @@
 import datetime
-from Webscraper import Webscraper
+from Webscraper_old import Webscraper
 from Assignment import Assignment
 
 class Notifier:
