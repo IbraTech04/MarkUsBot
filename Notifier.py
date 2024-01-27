@@ -1,8 +1,9 @@
-import datetime
+import nextcord
+from nextcord.ext import commands, tasks
 from Webscraper_old import Webscraper
-from Assignment import Assignment
+from MarkUsUtils import Course, Assignment
 
-class Notifier:
+class Notifier(commands.Cog):
     """
     Class which keeps track of MarkUs Assignments and notifies the user when an assignment is due
     
@@ -21,58 +22,32 @@ class Notifier:
     _channel_id: int
     _role_id: int
     
-    def __init__(self, username: str, password: str, courseid: str, channel_id: int, role_id: int) -> None:
+    def __init__(self, bot: commands.Bot, markus_url: str, course_id: int, role_id: int, channel_id: int) -> None:
         """
         Initialize a Notifier object
         """
-        self._assignments = {}
-        self._webscraper = Webscraper(username, password, courseid)
-        self._channel_id = channel_id
+        super().__init__()
+        self.bot = bot
+        self.course = Course(markus_url, course_id)
         self._role_id = role_id
-        self._update_assignments()
+        self._channel_id = channel_id
+        self.check_for_assignments.start()
     
-    def _update_assignments(self) -> None:
+    def new_assignments_refresh(self) -> list[Assignment]:
         """
-        Update the list of assignments. If the assignment is not in the dictionary, add it. If it is, update the due date and released status
-        This method assumes all assignments that have already been released have been announced
+        Method invoked by the bot to get a list of all new assignments
         """
-        assignmnets = self._webscraper.get_assignments()
-        for assignment in assignmnets:
-            if assignment['Assessment'] not in self._assignments:
-                # Make a new assignment object to add to the dictionary
-                name = assignment['Assessment']
-                due_date = datetime.datetime.strptime(assignment['Due date'][:-4].strip(), "%A, %B %d, %Y, %I:%M:%S %p")
-                is_released = assignment['Results'] == 'Results'
-                self._assignments[name] = Assignment(name, due_date, is_released, is_released)
-        
-            # If it's already in the dictionary, update the due date and released status
-            else:
-                is_released = assignment['Results'] == 'Results'
-                self._assignments[assignment['Assessment']].set_released(is_released)
+        self.course._update_assignments()
+        return self.course.get_new_assignments()
     
-    def get_released_assignments(self) -> list[Assignment]:
+    @tasks.loop(seconds=60)
+    async def check_for_assignments(self):
         """
-        Loops through the assignments and returns a list of released assignments that have not been announced
+        Method which checks for new assignments every 60 seconds
         """
-        self._update_assignments()
-        to_announce = []
-        for assignment in self._assignments.values():
-            if assignment.get_released() and not assignment.is_announced():
-                assignment.set_announced(True)
-                to_announce.append(assignment)
-        
-        return to_announce
-
-    def get_assignments(self) -> list[Assignment]:
-        """
-        Returns a list of all released assignments
-        """
-        self._update_assignments()
-        to_announce = []
-        for assignment in self._assignments.values():
-            if assignment.get_released():
-                assignment.set_announced(True)
-                to_announce.append(assignment)
-        
-        return to_announce        
+        for assignment in self.new_assignments_refresh():
+            channel = self.bot.get_channel(self._channel_id)
+            role = channel.guild.get_role(self._role_id)
+            await channel.send(f"{role.mention} `{assignment.get_name()}` has been released on MarkUs! It is due <t:{int(assignment.get_due_date().timestamp())}:F> (<t:{int(assignment.get_due_date().timestamp())}:R>)")
+            assignment.set_announced(True)
         
